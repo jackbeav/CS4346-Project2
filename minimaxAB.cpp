@@ -483,3 +483,51 @@ int main(int argc, const char * argv[]) {
     
     return 0;
 }
+
+int scoreLine(int line[], const int player){
+    int minL = 0;
+    int maxL = 0;
+    int length = sizeof(line)/sizeof(line[0]);
+    //shorthand
+    int empty = 0;
+    int pToken = player + 1;
+    if(length < 4){
+        return 0;
+    }
+    //score line
+    int score = 0;
+    for(int i = 0; i < length - 4; i++){
+        int sum = 0;
+        for(int j = i; j < i + 4; j++){
+            if(line[j] == -1){
+                sum = 0;
+                break;
+            }
+            sum += line[j];
+        }
+        if(sum > score){
+            score = sum;
+        }
+    }
+    return score;
+}
+
+int evalFunctionJ(int board[ROWS][COLS], const int player){
+    int score;
+    for(int i = 0; i < COLS; i++){
+        //find playable position in colummn
+        int index = 0;
+        while(board[i][index+1] == EMPTY_POSITION){
+            index++;
+        }
+        index--;
+
+        //check vertical
+        int vert[index + 3];
+        for(int j = 0; j < index + 3; j++){
+            // FILL IN AND FIX  
+        }
+        
+        
+    }
+}

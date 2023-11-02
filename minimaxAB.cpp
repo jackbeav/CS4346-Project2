@@ -484,19 +484,18 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 
-int scoreLine(int line[], const int player){
+int scoreLine(vector<int> line, const int player){
     int minL = 0;
     int maxL = 0;
-    int length = sizeof(line)/sizeof(line[0]);
     //shorthand
     int empty = 0;
     int pToken = player + 1;
-    if(length < 4){
+    if(line.size() < 4){
         return 0;
     }
     //score line
     int score = 0;
-    for(int i = 0; i < length - 4; i++){
+    for(int i = 0; i < line.size() - 4; i++){
         int sum = 0;
         for(int j = i; j < i + 4; j++){
             if(line[j] == -1){
@@ -522,12 +521,53 @@ int evalFunctionJ(int board[ROWS][COLS], const int player){
         }
         index--;
 
+        vector<int> line;
         //check vertical
-        int vert[index + 3];
-        for(int j = 0; j < index + 3; j++){
-            // FILL IN AND FIX  
+        int c = 0;
+        for(int j = index - 3; j < index + 3 && j < ROWS; j++){
+            if(j < 0){ j = 0; }
+            line[c] = board[i][j];
+            c++; 
         }
-        
+        score += scoreLine(line, player);
+
+        //check horizontal
+        line.clear();
+        c = 0;
+        for(int j = i - 3; j < i + 3 && j < COLS; j++){
+            if(j < 0){ j = 0; }
+            line[c] = board[j][index];
+            c++; 
+        }
+        score += scoreLine(line, player);
+
+        //check 1st diagonal
+        int j = index - 3;
+        int k = i - 3;
+        c = 0;
+        if(j < 0){j = 0;}
+        if(k < 0){k = 0;}
+        while(j < index + 3 && j < ROWS && k < i + 3 && k < COLS){
+            line[c] = board[k][j]; 
+            j++;
+            k++;
+            c++;
+        }
+        score += scoreLine(line, player);
+
+        //check 2nd diagonal
+        j = index - 3;
+        k = i + 3;
+        c = 0;
+        if(j < 0){j = 0;}
+        if(k < 0){k = 0;}
+        while(j < index + 3 && j < ROWS && k > i - 3 && k > 0){
+            line[c] = board[k][j]; 
+            j++;
+            k--;
+            c++;
+        }
+        score += scoreLine(line, player);
         
     }
 }

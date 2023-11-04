@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <random>
 #include <vector>
+#include <chrono>
 using namespace std;
 
 const int ROWS = 6;
@@ -27,6 +28,9 @@ struct Position{
     int val;
 };
 
+//function prototypes
+int evalFunctionJ(int board[ROWS][COLS], const int player);
+int scoreLine(vector<int> line, const int player);
 
 void create_board(int board[ROWS][COLS]){
     for (int i=0; i<ROWS; i++){
@@ -347,18 +351,18 @@ int evalFunction(int board[ROWS][COLS], const int player){
 }
 
 Position minimaxAB(int board[ROWS][COLS],int depth,const int player,int use_thresh,int pass_thresh){
-    cout<<"Entered Function -> player: "<<player<<" depth: "<<depth<<" use thres: "<<use_thresh<<" pass thres: "<<pass_thresh<<endl;
+    cout<<"Entered Node -> player: "<<player<<" depth: "<<depth<<" use thres: "<<use_thresh<<" pass thres: "<<pass_thresh<<endl;
     
     Position funcPos;
     
     if (deepEnough(board,depth,player)){
-        funcPos.val = evalFunction(board,player);
+        funcPos.val = evalFunctionJ(board,player);
         //funcPos.c = -1;
         if (player == MAX_PLAYER_NUM)
             funcPos.val = funcPos.val;
         else
             funcPos.val = -funcPos.val;
-        cout<<"Exiting Function -> player: "<<player<<" depth: "<<depth<<" funcPos col returning: "<<funcPos.c<<" funcPos value: "<<funcPos.val<<endl;
+        cout<<"Exiting Node; depth limit -> player: "<<player<<" depth: "<<depth<<" funcPos col returning: "<<funcPos.c<<" funcPos value: "<<funcPos.val<<endl;
         return funcPos;
     }
     else{
@@ -384,8 +388,10 @@ Position minimaxAB(int board[ROWS][COLS],int depth,const int player,int use_thre
             //printBoard(board);
             //cout<<"current row & col: "<<validRow<<"  "<< validColumn<<endl;
             
-            localPos = minimaxAB(boardCopy,depth+1, !player, -pass_thresh, -use_thresh);
-            newValue = -(localPos.val);
+            //old implementation; had problems. keeping code here in case my version breaks something else :)
+            //localPos = minimaxAB(boardCopy,depth+1, !player, -pass_thresh, -use_thresh);
+            //newValue = -(localPos.val);
+            newValue = -(minimaxAB(boardCopy,depth+1, !player, -pass_thresh, -use_thresh).val);
             if (newValue > pass_thresh){
                 pass_thresh = newValue;
                 localPos.c = validColumn;
@@ -407,7 +413,7 @@ Position minimaxAB(int board[ROWS][COLS],int depth,const int player,int use_thre
             funcPos.val = funcPos.val;
         else
             funcPos.val = -funcPos.val;
-        cout<<"Exiting Function -> player: "<<player<<" depth: "<<depth<<" funcPos col returning: "<<funcPos.c<<" funcPos value: "<<funcPos.val<<endl;
+        cout<<"Exiting Node;children analyzed -> player: "<<player<<" depth: "<<depth<<" funcPos col returning: "<<funcPos.c<<" funcPos value: "<<funcPos.val<<endl;
         return funcPos;
     }
     
@@ -485,8 +491,8 @@ int main(int argc, const char * argv[]) {
 }
 
 int scoreLine(vector<int> line, const int player){
-    int minL = 0;
-    int maxL = 0;
+    int test[8];
+    copy(line.begin(), line.end(), test);
     //shorthand
     int empty = 0;
     int pToken = player + 1;
@@ -495,10 +501,10 @@ int scoreLine(vector<int> line, const int player){
     }
     //score line
     int score = 0;
-    for(int i = 0; i < line.size() - 4; i++){
+    for(int i = 0; i < line.size() - 3; i++){
         int sum = 0;
         for(int j = i; j < i + 4; j++){
-            if(line[j] == -1){
+            if(line[j] != pToken && line[j] != empty){
                 sum = 0;
                 break;
             }
@@ -512,62 +518,57 @@ int scoreLine(vector<int> line, const int player){
 }
 
 int evalFunctionJ(int board[ROWS][COLS], const int player){
-    int score;
+    int score = 0;
     for(int i = 0; i < COLS; i++){
         //find playable position in colummn
         int index = 0;
-        while(board[i][index+1] == EMPTY_POSITION){
+        while(board[index+1][i] == EMPTY_POSITION && (index + 1) != ROWS){
             index++;
         }
-        index--;
 
         vector<int> line;
         //check vertical
-        int c = 0;
-        for(int j = index - 3; j < index + 3 && j < ROWS; j++){
+        for(int j = index - 3; j <= index + 3 && j < ROWS; j++){
             if(j < 0){ j = 0; }
-            line[c] = board[i][j];
-            c++; 
+            int test = board[j][i];
+            line.push_back(board[j][i]); 
         }
         score += scoreLine(line, player);
 
         //check horizontal
         line.clear();
-        c = 0;
-        for(int j = i - 3; j < i + 3 && j < COLS; j++){
+        for(int j = i - 3; j <= i + 3 && j < COLS; j++){                 
             if(j < 0){ j = 0; }
-            line[c] = board[j][index];
-            c++; 
+            line.push_back(board[index][j]);
         }
         score += scoreLine(line, player);
 
         //check 1st diagonal
+        line.clear();
         int j = index - 3;
         int k = i - 3;
-        c = 0;
-        if(j < 0){j = 0;}
-        if(k < 0){k = 0;}
-        while(j < index + 3 && j < ROWS && k < i + 3 && k < COLS){
-            line[c] = board[k][j]; 
+        while(j <= index + 3 && j < ROWS && k <= i + 3 && k < COLS){
+            if(j >= 0 && k >= 0){
+                line.push_back(board[j][k]);
+            }
             j++;
             k++;
-            c++;
         }
         score += scoreLine(line, player);
 
         //check 2nd diagonal
+        line.clear();
         j = index - 3;
         k = i + 3;
-        c = 0;
-        if(j < 0){j = 0;}
-        if(k < 0){k = 0;}
-        while(j < index + 3 && j < ROWS && k > i - 3 && k > 0){
-            line[c] = board[k][j]; 
+        while(j <= index + 3 && j < ROWS && k >= i - 3 && k >= 0){
+            if(j >= 0 && k < COLS){
+                line.push_back(board[j][k]);
+            }
             j++;
             k--;
-            c++;
         }
         score += scoreLine(line, player);
         
     }
+    return score;
 }

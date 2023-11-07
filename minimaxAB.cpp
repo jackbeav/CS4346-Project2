@@ -1,24 +1,28 @@
 
+
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
 #include <random>
 #include <vector>
+#include <chrono>
 using namespace std;
 
 const int ROWS = 6;
 const int COLS = 7;
-//const int TOTAL_SQUARES = ROWS * COLS;
 const int MAX_PLAYER_NUM = 0;
 const int MIN_PLAYER_NUM = 1;
 const int EMPTY_POSITION = 0;
 const int MAX_PLAYER_PIECE = 1;
 const int MIN_PLAYER_PIECE = 2;
-const int MAX_DEPTH = 3;
-const int MIN_DEPTH = 3;
+int MAX_DEPTH;
+int MIN_DEPTH;
 const int ALPHA = 1000;
 const int BETA = -1000;
-const int EVAL_FUNCTION = 1;
+int MAX_EVAL_FUNCTION;
+int MIN_EVAL_FUNCTION;
+int MAX_NODES_GENERATED = 0;
+int MIN_NODES_GENERATED = 0;
 
 unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -194,171 +198,264 @@ bool deepEnough(int board[ROWS][COLS],int depth,const int player){
     }
 }
 
-int evalFunction(int board[ROWS][COLS], const int player){
-    //cout<<"In eval function player: "<<player<<endl;
-    //printBoard(board);
+int evalFunctionAli(int board[ROWS][COLS]){
+    int total_score = 0;
     
-    if (EVAL_FUNCTION == 1){
-        int total_score = 0;
-        
-     /*   if (winning_move(board, MAX_PLAYER_PIECE)){
-            total_score = 1000;
-            //cout<<"In eval function MAX player is winning so return 1000"<<endl;
-            return total_score;
-        }
-        if (winning_move(board, MIN_PLAYER_PIECE)){
-            total_score = -1000;
-            //cout<<"In eval function MIN player is winning so return -1000"<<endl;
-            return total_score;
-        }
-        
-        if (is_draw(board)){
-            total_score = 0;
-            //cout<<"In eval function it's a draw so return 0"<<endl;
-            return total_score;
-        } */
-        
-        int max_player_array[4] = {0,0,0,0};
-        int min_player_array[4] = {0,0,0,0};
-        
-        //for MAX
-        //horizontal
-        for (int c = 0; c < 5 ; c++){
-            for (int r = 0; r < ROWS; r++){
-                if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r][c+1] == MAX_PLAYER_PIECE))
-                    max_player_array[0] += 2;
-                if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r][c+1] == MAX_PLAYER_PIECE) && (board[r][c+2] == MAX_PLAYER_PIECE))
-                    max_player_array[0] += 3;
-            }
-        }
-        //vertical
-        for (int c = 0; c < COLS ; c++){
-            for (int r = 0; r < 4; r++){
-                if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r+1][c] == MAX_PLAYER_PIECE))
-                    max_player_array[1] += 2;
-                if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r+1][c] == MAX_PLAYER_PIECE) && (board[r+2][c] == MAX_PLAYER_PIECE))
-                    max_player_array[1] += 3;
-            }
-        }
-        //positive diagonal
-        for (int c = 0; c < 5; c++){
-            for (int r = 0; r < 4; r++){
-                if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r+1][c+1] == MAX_PLAYER_PIECE))
-                    max_player_array[2] += 2;
-                if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r+1][c+1] == MAX_PLAYER_PIECE) && (board[r+2][c+2] == MAX_PLAYER_PIECE))
-                    max_player_array[2] += 3;
-            }
-        }
-        for (int c = 0; c < 6; c++){
-            if ((board[4][c] == MAX_PLAYER_PIECE) && (board[5][c+1] == MAX_PLAYER_PIECE))
-                max_player_array[2] += 2;
-        }
-        for (int r = 0; r < 5; r++){
-            if ((board[r][5] == MAX_PLAYER_PIECE) && (board[r+1][6] == MAX_PLAYER_PIECE))
-                max_player_array[2] += 2;
-        }
-        
-        //negative diagonal
-        for (int c = 0; c < 5; c++){
-            for (int r = 2; r < ROWS; r++){
-                if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r-1][c+1] == MAX_PLAYER_PIECE))
-                    max_player_array[3] += 2;
-                if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r-1][c+1] == MAX_PLAYER_PIECE) && (board[r-2][c+2] == MAX_PLAYER_PIECE))
-                    max_player_array[3] += 3;
-            }
-        }
-        for (int c = 0; c < 6; c++){
-            if ((board[1][c] == MAX_PLAYER_PIECE) && (board[0][c+1] == MAX_PLAYER_PIECE))
-                max_player_array[3] += 2;
-        }
-        for (int r = 1; r < 6; r++){
-            if ((board[r][5] == MAX_PLAYER_PIECE) && (board[r-1][6] == MAX_PLAYER_PIECE))
-                max_player_array[3] += 2;
-        }
-        
-        //for MIN
-        //horizontal
-        for (int c = 0; c < 5 ; c++){
-            for (int r = 0; r < ROWS; r++){
-                if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r][c+1] == MIN_PLAYER_PIECE))
-                    min_player_array[0] += 2;
-                if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r][c+1] == MIN_PLAYER_PIECE) && (board[r][c+2] == MIN_PLAYER_PIECE))
-                    min_player_array[0] += 3;
-            }
-        }
-        //vertical
-        for (int c = 0; c < COLS ; c++){
-            for (int r = 0; r < 4; r++){
-                if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r+1][c] == MIN_PLAYER_PIECE))
-                    min_player_array[1] += 2;
-                if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r+1][c] == MIN_PLAYER_PIECE) && (board[r+2][c] == MIN_PLAYER_PIECE))
-                    min_player_array[1] += 3;
-            }
-        }
-        //positive diagonal
-        for (int c = 0; c < 5; c++){
-            for (int r = 0; r < 4; r++){
-                if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r+1][c+1] == MIN_PLAYER_PIECE))
-                    min_player_array[2] += 2;
-                if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r+1][c+1] == MIN_PLAYER_PIECE) && (board[r+2][c+2] == MIN_PLAYER_PIECE))
-                    min_player_array[2] += 3;
-            }
-        }
-        for (int c = 0; c < 6; c++){
-            if ((board[4][c] == MIN_PLAYER_PIECE) && (board[5][c+1] == MIN_PLAYER_PIECE))
-                min_player_array[2] += 2;
-        }
-        for (int r = 0; r < 5; r++){
-            if ((board[r][5] == MIN_PLAYER_PIECE) && (board[r+1][6] == MIN_PLAYER_PIECE))
-                min_player_array[2] += 2;
-        }
-        
-        //negative diagonal
-        for (int c = 0; c < 5; c++){
-            for (int r = 2; r < ROWS; r++){
-                if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r-1][c+1] == MIN_PLAYER_PIECE))
-                    min_player_array[3] += 2;
-                if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r-1][c+1] == MIN_PLAYER_PIECE) && (board[r-2][c+2] == MIN_PLAYER_PIECE))
-                    min_player_array[3] += 3;
-            }
-        }
-        for (int c = 0; c < 6; c++){
-            if ((board[1][c] == MIN_PLAYER_PIECE) && (board[0][c+1] == MIN_PLAYER_PIECE))
-                min_player_array[3] += 2;
-        }
-        for (int r = 1; r < 6; r++){
-            if ((board[r][5] == MIN_PLAYER_PIECE) && (board[r-1][6] == MIN_PLAYER_PIECE))
-                min_player_array[3] += 2;
-        }
-        
-        total_score = (max_player_array[0] + max_player_array[1] + max_player_array[2] + max_player_array[3]) - (min_player_array[0] + min_player_array[1] + min_player_array[2] + min_player_array[3]);
-        
-        //cout<<"In eval function current score returning is: "<<total_score<<endl;
+    if (winning_move(board, MAX_PLAYER_PIECE)){
+        total_score = 1000;
+        //cout<<"In eval function MAX player is winning so return 1000"<<endl;
         return total_score;
     }
-    else if (EVAL_FUNCTION == 2){
-        //2nd Eval function code goes here
+    if (winning_move(board, MIN_PLAYER_PIECE)){
+        total_score = -1000;
+        //cout<<"In eval function MIN player is winning so return -1000"<<endl;
+        return total_score;
+    }
+    
+    if (is_draw(board)){
+        total_score = 0;
+        //cout<<"In eval function it's a draw so return 0"<<endl;
+        return total_score;
+    }
+    
+    int max_player_array[4] = {0,0,0,0};
+    int min_player_array[4] = {0,0,0,0};
+    
+    //for MAX
+    //horizontal
+    for (int c = 0; c < 5 ; c++){
+        for (int r = 0; r < ROWS; r++){
+            if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r][c+1] == MAX_PLAYER_PIECE))
+                max_player_array[0] += 2;
+            if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r][c+1] == MAX_PLAYER_PIECE) && (board[r][c+2] == MAX_PLAYER_PIECE))
+                max_player_array[0] += 3;
+        }
+    }
+    //vertical
+    for (int c = 0; c < COLS ; c++){
+        for (int r = 0; r < 4; r++){
+            if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r+1][c] == MAX_PLAYER_PIECE))
+                max_player_array[1] += 2;
+            if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r+1][c] == MAX_PLAYER_PIECE) && (board[r+2][c] == MAX_PLAYER_PIECE))
+                max_player_array[1] += 3;
+        }
+    }
+    //positive diagonal
+    for (int c = 0; c < 5; c++){
+        for (int r = 0; r < 4; r++){
+            if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r+1][c+1] == MAX_PLAYER_PIECE))
+                max_player_array[2] += 2;
+            if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r+1][c+1] == MAX_PLAYER_PIECE) && (board[r+2][c+2] == MAX_PLAYER_PIECE))
+                max_player_array[2] += 3;
+        }
+    }
+    for (int c = 0; c < 6; c++){
+        if ((board[4][c] == MAX_PLAYER_PIECE) && (board[5][c+1] == MAX_PLAYER_PIECE))
+            max_player_array[2] += 2;
+    }
+    for (int r = 0; r < 5; r++){
+        if ((board[r][5] == MAX_PLAYER_PIECE) && (board[r+1][6] == MAX_PLAYER_PIECE))
+            max_player_array[2] += 2;
+    }
+    
+    //negative diagonal
+    for (int c = 0; c < 5; c++){
+        for (int r = 2; r < ROWS; r++){
+            if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r-1][c+1] == MAX_PLAYER_PIECE))
+                max_player_array[3] += 2;
+            if ((board[r][c] == MAX_PLAYER_PIECE) && (board[r-1][c+1] == MAX_PLAYER_PIECE) && (board[r-2][c+2] == MAX_PLAYER_PIECE))
+                max_player_array[3] += 3;
+        }
+    }
+    for (int c = 0; c < 6; c++){
+        if ((board[1][c] == MAX_PLAYER_PIECE) && (board[0][c+1] == MAX_PLAYER_PIECE))
+            max_player_array[3] += 2;
+    }
+    for (int r = 1; r < 6; r++){
+        if ((board[r][5] == MAX_PLAYER_PIECE) && (board[r-1][6] == MAX_PLAYER_PIECE))
+            max_player_array[3] += 2;
+    }
+    //for MIN
+    //horizontal
+    for (int c = 0; c < 5 ; c++){
+        for (int r = 0; r < ROWS; r++){
+            if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r][c+1] == MIN_PLAYER_PIECE))
+                min_player_array[0] += 2;
+            if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r][c+1] == MIN_PLAYER_PIECE) && (board[r][c+2] == MIN_PLAYER_PIECE))
+                min_player_array[0] += 3;
+        }
+    }
+    //vertical
+    for (int c = 0; c < COLS ; c++){
+        for (int r = 0; r < 4; r++){
+            if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r+1][c] == MIN_PLAYER_PIECE))
+                min_player_array[1] += 2;
+            if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r+1][c] == MIN_PLAYER_PIECE) && (board[r+2][c] == MIN_PLAYER_PIECE))
+                min_player_array[1] += 3;
+        }
+    }
+    //positive diagonal
+    for (int c = 0; c < 5; c++){
+        for (int r = 0; r < 4; r++){
+            if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r+1][c+1] == MIN_PLAYER_PIECE))
+                min_player_array[2] += 2;
+            if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r+1][c+1] == MIN_PLAYER_PIECE) && (board[r+2][c+2] == MIN_PLAYER_PIECE))
+                min_player_array[2] += 3;
+        }
+    }
+    for (int c = 0; c < 6; c++){
+        if ((board[4][c] == MIN_PLAYER_PIECE) && (board[5][c+1] == MIN_PLAYER_PIECE))
+            min_player_array[2] += 2;
+    }
+    for (int r = 0; r < 5; r++){
+        if ((board[r][5] == MIN_PLAYER_PIECE) && (board[r+1][6] == MIN_PLAYER_PIECE))
+            min_player_array[2] += 2;
+    }
+    
+    //negative diagonal
+    for (int c = 0; c < 5; c++){
+        for (int r = 2; r < ROWS; r++){
+            if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r-1][c+1] == MIN_PLAYER_PIECE))
+                min_player_array[3] += 2;
+            if ((board[r][c] == MIN_PLAYER_PIECE) && (board[r-1][c+1] == MIN_PLAYER_PIECE) && (board[r-2][c+2] == MIN_PLAYER_PIECE))
+                min_player_array[3] += 3;
+        }
+    }
+    for (int c = 0; c < 6; c++){
+        if ((board[1][c] == MIN_PLAYER_PIECE) && (board[0][c+1] == MIN_PLAYER_PIECE))
+            min_player_array[3] += 2;
+    }
+    for (int r = 1; r < 6; r++){
+        if ((board[r][5] == MIN_PLAYER_PIECE) && (board[r-1][6] == MIN_PLAYER_PIECE))
+            min_player_array[3] += 2;
+    }
+    
+    total_score = (max_player_array[0] + max_player_array[1] + max_player_array[2] + max_player_array[3]) - (min_player_array[0] + min_player_array[1] + min_player_array[2] + min_player_array[3]);
+    
+    //cout<<"In eval function current score returning is: "<<total_score<<endl;
+    return total_score;
+}
+
+int scoreLine(vector<int> line, const int player){
+    int test[8];
+    copy(line.begin(), line.end(), test);
+    //shorthand
+    int empty = 0;
+    int pToken = player + 1;
+    if(line.size() < 4){
         return 0;
     }
+    //score line
+    int score = 0;
+    for(int i = 0; i < line.size() - 3; i++){
+        int sum = 0;
+        for(int j = i; j < i + 4; j++){
+            if(line[j] != pToken && line[j] != empty){
+                sum = 0;
+                break;
+            }
+            sum += line[j];
+        }
+        if(sum > score){
+            score = sum;
+        }
+    }
+    return score;
+}
+
+int evalFunctionJack(int board[ROWS][COLS],const int player){
+    int score = 0;
+    for(int i = 0; i < COLS; i++){
+        //find playable position in colummn
+        int index = 0;
+        while(board[index+1][i] == EMPTY_POSITION && (index + 1) != ROWS){
+            index++;
+        }
+
+        vector<int> line;
+        //check vertical
+        for(int j = index - 3; j <= index + 3 && j < ROWS; j++){
+            if(j < 0){ j = 0; }
+            int test = board[j][i];
+            line.push_back(board[j][i]);
+        }
+        score += scoreLine(line, player);
+
+        //check horizontal
+        line.clear();
+        for(int j = i - 3; j <= i + 3 && j < COLS; j++){
+            if(j < 0){ j = 0; }
+            line.push_back(board[index][j]);
+        }
+        score += scoreLine(line, player);
+
+        //check 1st diagonal
+        line.clear();
+        int j = index - 3;
+        int k = i - 3;
+        while(j <= index + 3 && j < ROWS && k <= i + 3 && k < COLS){
+            if(j >= 0 && k >= 0){
+                line.push_back(board[j][k]);
+            }
+            j++;
+            k++;
+        }
+        score += scoreLine(line, player);
+
+        //check 2nd diagonal
+        line.clear();
+        j = index - 3;
+        k = i + 3;
+        while(j <= index + 3 && j < ROWS && k >= i - 3 && k >= 0){
+            if(j >= 0 && k < COLS){
+                line.push_back(board[j][k]);
+            }
+            j++;
+            k--;
+        }
+        score += scoreLine(line, player);
+    }
+    return score;
+}
+
+int evalFunctionMasin(int board[ROWS][COLS]){
+    return 0; //dummy value returned function yet to implement
+}
+
+
+int evalFunction(int board[ROWS][COLS], const int player){
+    
+    if (player == MAX_PLAYER_NUM){
+        if (MAX_EVAL_FUNCTION == 1)
+            return evalFunctionAli(board);
+        else if (MAX_EVAL_FUNCTION == 2)
+            return evalFunctionJack(board,player);
+        else
+            return evalFunctionMasin(board);
+    }
     else{
-        //3rd Eval function code goes here
-        return 0;;
+        if (MIN_EVAL_FUNCTION == 1)
+            return evalFunctionAli(board);
+        else if (MIN_EVAL_FUNCTION == 2)
+            return evalFunctionJack(board,player);
+        else
+            return evalFunctionMasin(board);
     }
 }
 
 Position minimaxAB(int board[ROWS][COLS],int depth,const int player,int use_thresh,int pass_thresh){
-    cout<<"Entered Function -> player: "<<player<<" depth: "<<depth<<" use thres: "<<use_thresh<<" pass thres: "<<pass_thresh<<endl;
+    //cout<<"Entered Function -> player: "<<player<<" depth: "<<depth<<" use thres: "<<use_thresh<<" pass thres: "<<pass_thresh<<endl;
     
     Position funcPos;
     
     if (deepEnough(board,depth,player)){
         funcPos.val = evalFunction(board,player);
-        //funcPos.c = -1;
         if (player == MAX_PLAYER_NUM)
             funcPos.val = funcPos.val;
         else
             funcPos.val = -funcPos.val;
-        cout<<"Exiting Function -> player: "<<player<<" depth: "<<depth<<" funcPos col returning: "<<funcPos.c<<" funcPos value: "<<funcPos.val<<endl;
+        //cout<<"Exiting Deep Node with funcPos value: "<< funcPos.val<<endl;
+        //cout<<"Exiting Function -> player: "<<player<<" depth: "<<depth<<" funcPos col returning: "<<funcPos.c<<" funcPos value: "<<funcPos.val<<endl;
         return funcPos;
     }
     else{
@@ -366,40 +463,46 @@ Position minimaxAB(int board[ROWS][COLS],int depth,const int player,int use_thre
         Position localPos;
         vector<int> successors = get_valid_locations(board);
         
-        
         for (int i = 0;(i < successors.size());i++){
             if (successors[i] == -1)
                 continue;
             
             int validColumn = successors[i];
-            //pos.c = validColumn;
             int validRow = get_next_open_row(board, validColumn);
-            if (player == MAX_PLAYER_NUM)
+            if (player == MAX_PLAYER_NUM){
                 drop_piece(board, validRow, validColumn, MAX_PLAYER_PIECE);
-            else
+                MAX_NODES_GENERATED++;
+            }
+            else{
                 drop_piece(board, validRow, validColumn, MIN_PLAYER_PIECE);
+                MIN_NODES_GENERATED++;
+            }
             
             int boardCopy[ROWS][COLS];
             std::copy(&board[0][0], &board[0][0]+ROWS*COLS, &boardCopy[0][0]);
             //printBoard(board);
             //cout<<"current row & col: "<<validRow<<"  "<< validColumn<<endl;
             
-            localPos = minimaxAB(boardCopy,depth+1, !player, -pass_thresh, -use_thresh);
-            newValue = -(localPos.val);
+            newValue = -(minimaxAB(boardCopy,depth+1, !player, -pass_thresh, -use_thresh).val);
+            localPos.val = newValue;
+            
             if (newValue > pass_thresh){
                 pass_thresh = newValue;
                 localPos.c = validColumn;
                 localPos.val = newValue;
+                //funcPos.val = localPos.val; // change this if needed testing
             }
-            cout<<"newValue: "<<newValue<<" pass thres: "<<pass_thresh<<endl;
+            //else
+            //    localPos.val = newValue;
+            
+            board[validRow][validColumn] = EMPTY_POSITION;
+            
+            //cout<<"newValue: "<<newValue<<" pass thres: "<<pass_thresh<<endl;
             if (pass_thresh >= use_thresh){
-                cout<<"Tree is pruned"<<endl;
+                //cout<<"Tree is pruned"<<endl;
                 break; //pruned
             }
-            if (player == MAX_PLAYER_NUM)
-                board[validRow][validColumn] = EMPTY_POSITION;
-            else
-                board[validRow][validColumn] = EMPTY_POSITION;
+            
         }
         funcPos.c = localPos.c;
         funcPos.val = localPos.val;
@@ -407,29 +510,39 @@ Position minimaxAB(int board[ROWS][COLS],int depth,const int player,int use_thre
             funcPos.val = funcPos.val;
         else
             funcPos.val = -funcPos.val;
-        cout<<"Exiting Function -> player: "<<player<<" depth: "<<depth<<" funcPos col returning: "<<funcPos.c<<" funcPos value: "<<funcPos.val<<endl;
+        //cout<<"Exiting Level with funcPos col: "<<funcPos.c<< " funcPos value: "<< funcPos.val<<endl;
+        //cout<<"Exiting Function -> player: "<<player<<" depth: "<<depth<<" funcPos col returning: "<<funcPos.c<<" funcPos value: "<<funcPos.val<<endl;
         return funcPos;
     }
     
 }
 
 int main(int argc, const char * argv[]) {
-    //int randomTurnToStart = rand() % 2;
+    MAX_DEPTH = atoi(argv[1]);
+    MAX_EVAL_FUNCTION = atoi(argv[2]);
+    MIN_DEPTH = atoi(argv[3]);
+    MIN_EVAL_FUNCTION = atoi(argv[4]);
+    
+    auto start = chrono::high_resolution_clock::now(); //start clock here
     int board[ROWS][COLS] = {};
     create_board(board);
     bool game_over = false;
     int turn = rand() % 2;
-    //int turn = 0;
+    
+    if (turn == MAX_PLAYER_NUM)
+        cout<<"MAX player starts the game"<<endl;
+    else
+        cout<<"MIN player starts the game"<<endl;
     
     while (!game_over){
         if (turn == MAX_PLAYER_NUM){
-            cout<<"MAX player turn" <<endl;
+            //cout<<"MAX player turn" <<endl;
             Position pos = minimaxAB(board, 0, MAX_PLAYER_NUM, ALPHA, BETA);
-            cout<<"In main function, col returned: "<<pos.c<<" value : "<<pos.val<<endl;
+            //cout<<"In main function, col returned: "<<pos.c<<" value : "<<pos.val<<endl;
             if (is_valid_location(board, pos.c)){
                 int row = get_next_open_row(board, pos.c);
                 drop_piece(board, row, pos.c, MAX_PLAYER_PIECE);
-                cout<<"current row & col: "<<row<<"  "<< pos.c<<endl;
+                //cout<<"current row & col: "<<row<<"  "<< pos.c<<endl;
 
                 
                 if ((winning_move(board, MAX_PLAYER_PIECE))){
@@ -447,17 +560,17 @@ int main(int argc, const char * argv[]) {
                 
                 turn++;
                 turn = turn % 2;
-                printBoard(board);
+                //printBoard(board);
             }
         }
         else{
-            cout<<"MIN player turn" <<endl;
+            //cout<<"MIN player turn" <<endl;
             Position pos = minimaxAB(board, 0, MIN_PLAYER_NUM, ALPHA, BETA);
-            cout<<"In main function, col returned: "<<pos.c<<" value : "<<pos.val<<endl;
+            //cout<<"In main function, col returned: "<<pos.c<<" value : "<<pos.val<<endl;
             if (is_valid_location(board, pos.c)){
                 int row = get_next_open_row(board, pos.c);
                 drop_piece(board, row, pos.c, MIN_PLAYER_PIECE);
-                cout<<"current row & col: "<<row<<"  "<< pos.c<<endl;
+                //cout<<"current row & col: "<<row<<"  "<< pos.c<<endl;
 
                 
                 if ((winning_move(board, MIN_PLAYER_PIECE))){
@@ -475,11 +588,22 @@ int main(int argc, const char * argv[]) {
                 
                 turn++;
                 turn = turn % 2;
-                printBoard(board);
+                //printBoard(board);
             }
         }
     }
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
+    long long time = duration.count();
+    printBoard(board);
+    cout<<"Max Depth used: "<<MAX_DEPTH<<endl;
+    cout<<"Evaluation Function used by Max: "<<MAX_EVAL_FUNCTION<<endl;
+    cout<<"Min Depth used: "<<MIN_DEPTH<<endl;
+    cout<<"Evaluation Function used by Min: "<<MIN_EVAL_FUNCTION<<endl;
     
+    cout << "Program Execution Time: " << time << " milliseconds" << endl;
+    cout<<"Total Max Nodes Generated: "<<MAX_NODES_GENERATED<<endl;
+    cout<<"Total Min Nodes Generated: "<<MIN_NODES_GENERATED<<endl;
     
     return 0;
 }

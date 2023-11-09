@@ -359,6 +359,9 @@ int scoreLine(vector<int> line, const int player){
         if(sum > score){
             score = sum;
         }
+        if(sum == 4){
+            return 1000;
+        }
     }
     return score;
 }

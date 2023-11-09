@@ -418,8 +418,147 @@ int evalFunctionJack(int board[ROWS][COLS],const int player){
     return score;
 }
 
-int evalFunctionMasin(int board[ROWS][COLS]){
-    return 0; //dummy value returned function yet to implement
+int evalFunctionMasin(int board[ROWS][COLS], const int player){
+    int score = 0;
+    int piece = player + 1;
+    int oppositePiece;
+
+    switch(player) {
+        case MAX_PLAYER_NUM:
+            oppositePiece = MIN_PLAYER_PIECE;
+            break;
+        case MIN_PLAYER_NUM:
+            oppositePiece = MAX_PLAYER_PIECE;
+            break;
+    }
+
+    // check if board creates a winning move
+    if (winning_move(board, piece)) {
+        score = 1000;
+    } else {
+        // count concurrent pieces with potential to improve position (not blocked)
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLS; c++) {
+                // check if current index is occupied by player
+                if (board[r][c] == piece) {
+                    // check above
+                    if (r - 3 >= 0) {   // ensure check stays in bounds
+                        // check if path is blocked
+                        if (board[r - 1][c] != oppositePiece && board[r - 2][c] != oppositePiece && board[r - 3][c] != oppositePiece) {
+                            if (board[r - 1][c] == piece && board[r - 2][c] == piece && board[r - 3][c] == EMPTY_POSITION) {
+                                score += 5;
+                            }
+                            else if (board[r - 1][c] == piece && board[r - 2][c] == EMPTY_POSITION) {
+                                score += 2;
+                            }
+                            else {
+                                score++;
+                            }
+                        }
+                    }
+
+                    // check up left
+                    if (r - 3 >= 0 && c - 3 >= 0) { // ensure check stays in bounds
+                        // check if path is blocked
+                        if (board[r - 1][c - 1] != oppositePiece && board[r - 2][c - 2] != oppositePiece && board[r - 3][c - 3] != oppositePiece) {
+                            if (board[r - 1][c - 1] == piece && board[r - 2][c - 2] == piece && board[r - 3][c - 3] == EMPTY_POSITION) {
+                                score += 5;
+                            }
+                            else if (board[r - 1][c - 1] == piece && board[r - 2][c - 2] == EMPTY_POSITION) {
+                                score += 2;
+                            }
+                            else
+                            {
+                                score++;
+                            }
+                        }
+                    }
+
+                    // check up right
+                    if (r - 3 >= 0 && c + 3 <= COLS) {  // ensure check stays in bounds
+                        // check if path is blocked
+                        if (board[r - 1][c + 1] != oppositePiece && board[r - 2][c + 2] != oppositePiece && board[r - 3][c + 3] != oppositePiece) {
+                            if (board[r - 1][c + 1] == piece && board[r - 2][c + 2] == piece && board[r - 3][c + 3] == EMPTY_POSITION) {
+                                score += 5;
+                            }
+                            else if (board[r - 1][c + 1] == piece && board[r - 2][c + 2] == EMPTY_POSITION) {
+                                score += 2;
+                            }
+                            else {
+                                score++;
+                            }
+                        }
+                    }
+
+                    // check left
+                    if (c - 3 >= 0) {   // ensure check stays in bounds
+                        // check if path is blocked
+                        if (board[r][c - 1] != oppositePiece && board[r][c - 2] != oppositePiece && board[r][c - 3] != oppositePiece) {
+                            if (board[r][c - 1] == piece && board[r][c - 2] == piece && board[r][c - 3] == EMPTY_POSITION) {
+                                score += 5;
+                            }
+                            else if (board[r][c - 1] == piece && board[r][c - 2] == EMPTY_POSITION) {
+                                score += 2;
+                            }
+                            else {
+                                score++;
+                            }
+                        }
+                    }
+
+                    // check right
+                    if (c + 3 <= COLS) {    // ensure check stays in bounds
+                        // check if path is blocked
+                        if (board[r][c + 1] != oppositePiece && board[r][c + 2] != oppositePiece && board[r][c + 3] != oppositePiece) {
+                            if (board[r][c + 1] == piece && board[r][c + 2] == piece && board[r][c + 3] == EMPTY_POSITION) {
+                                score += 5;
+                            }
+                            else if (board[r][c + 1] == piece && board[r][c + 2] == EMPTY_POSITION) {
+                                score += 2;
+                            }
+                            else {
+                                score++;
+                            }
+                        }
+                    }
+
+                    // check down left
+                    if (r + 3 <= ROWS && c - 3 >= 0) {  // ensure check stays in bounds
+                        // check if path is blocked
+                        if (board[r + 1][c - 1] != oppositePiece && board[r + 2][c - 2] != oppositePiece && board[r + 3][c - 3] != oppositePiece) {
+                            if (board[r + 1][c - 1] == piece && board[r + 2][c - 2] == piece && board[r + 3][c - 3] == EMPTY_POSITION) {
+                                score += 5;
+                            }
+                            else if (board[r + 1][c - 1] == piece && board[r + 2][c - 2] == EMPTY_POSITION) {
+                                score += 2;
+                            }
+                            else {
+                                score++;
+                            }
+                        }
+                    }
+
+                    // check down right
+                    if (r + 3 <= ROWS && c + 3 <= COLS) {   // ensure check stays in bounds
+                        // check if path is blocked
+                        if (board[r + 1][c + 1] != oppositePiece && board[r + 2][c + 2] != oppositePiece && board[r + 3][c + 3] != oppositePiece) {
+                            if (board[r + 1][c + 1] == piece && board[r + 2][c + 2] == piece && board[r + 3][c + 3] == EMPTY_POSITION) {
+                                score += 5;
+                            }
+                            else if (board[r + 1][c + 1] == piece && board[r + 2][c + 2] == EMPTY_POSITION) {
+                                score += 2;
+                            }
+                            else {
+                                score++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return score;
 }
 
 
@@ -431,7 +570,7 @@ int evalFunction(int board[ROWS][COLS], const int player){
         else if (MAX_EVAL_FUNCTION == 2)
             return evalFunctionJack(board,player);
         else
-            return evalFunctionMasin(board);
+            return evalFunctionMasin(board, player);
     }
     else{
         if (MIN_EVAL_FUNCTION == 1)
@@ -439,7 +578,7 @@ int evalFunction(int board[ROWS][COLS], const int player){
         else if (MIN_EVAL_FUNCTION == 2)
             return evalFunctionJack(board,player);
         else
-            return evalFunctionMasin(board);
+            return evalFunctionMasin(board, player);
     }
 }
 
@@ -518,6 +657,11 @@ Position minimaxAB(int board[ROWS][COLS],int depth,const int player,int use_thre
 }
 
 int main(int argc, const char * argv[]) {
+    if (argc != 5) {
+        cerr << "ERROR: INCORRECT PROGRAM EXECUTION" << endl << "Correct program execution: mimimaxAB.exe MAX_DEPTH MAX_EVAL_FUNCTION MIN_DEPTH MIN_EVAL_FUNCTION" << endl;
+        return -1;
+    }
+
     MAX_DEPTH = atoi(argv[1]);
     MAX_EVAL_FUNCTION = atoi(argv[2]);
     MIN_DEPTH = atoi(argv[3]);
@@ -560,7 +704,7 @@ int main(int argc, const char * argv[]) {
                 
                 turn++;
                 turn = turn % 2;
-                //printBoard(board);
+                printBoard(board);
             }
         }
         else{

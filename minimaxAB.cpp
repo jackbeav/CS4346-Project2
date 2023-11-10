@@ -354,7 +354,9 @@ int scoreLine(vector<int> line, const int player){
                 sum = 0;
                 break;
             }
-            sum += line[j];
+            if(line[j] == pToken){
+                sum += 1;
+            }
         }
         if(sum > score){
             score = sum;
@@ -382,7 +384,12 @@ int evalFunctionJack(int board[ROWS][COLS],const int player){
             int test = board[j][i];
             line.push_back(board[j][i]);
         }
-        score += scoreLine(line, player);
+        int ls = scoreLine(line, player);
+        if(ls == 1000){
+            return 1000;
+        } else {
+            score += ls;
+        }
 
         //check horizontal
         line.clear();
@@ -390,7 +397,12 @@ int evalFunctionJack(int board[ROWS][COLS],const int player){
             if(j < 0){ j = 0; }
             line.push_back(board[index][j]);
         }
-        score += scoreLine(line, player);
+        int ls = scoreLine(line, player);
+        if(ls == 1000){
+            return 1000;
+        } else {
+            score += ls;
+        }
 
         //check 1st diagonal
         line.clear();
@@ -403,7 +415,12 @@ int evalFunctionJack(int board[ROWS][COLS],const int player){
             j++;
             k++;
         }
-        score += scoreLine(line, player);
+        int ls = scoreLine(line, player);
+        if(ls == 1000){
+            return 1000;
+        } else {
+            score += ls;
+        }
 
         //check 2nd diagonal
         line.clear();
@@ -416,7 +433,12 @@ int evalFunctionJack(int board[ROWS][COLS],const int player){
             j++;
             k--;
         }
-        score += scoreLine(line, player);
+        int ls = scoreLine(line, player);
+        if(ls == 1000){
+            return 1000;
+        } else {
+            score += ls;
+        }
     }
     return score;
 }
